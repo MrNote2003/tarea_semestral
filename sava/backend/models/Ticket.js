@@ -5,7 +5,8 @@ const ticketSchema = new mongoose.Schema({
   contenido: { type: String, required: true },
   detalles: { type: String, required: true },
   precio: { type: String, required: true },
-  fecha: { type: String, required: true } // Asegúrate de que el campo fecha esté definido
+  fecha: { type: String, required: false },
+  usado: { type: Boolean, default: false }
 });
 
 const Ticket = mongoose.model('Ticket', ticketSchema);
