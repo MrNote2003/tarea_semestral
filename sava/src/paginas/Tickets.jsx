@@ -10,22 +10,10 @@ function Tickets() {
     precio: '4990'
   });
 
-  // Opciones para contenido y detalles
-  const contenidoOptions = [
-    { value: 'Turno 1', label: 'Desayuno + Almuerzo', precio: '4990' },
-    { value: 'Turno 2', label: 'Once + Cena1', precio: '7990' },
-    { value: 'Turno 3', label: 'Cena2 + Desayuno', precio: '5990' }
-  ];
-
-  const detallesOptions = [
-    'Finanzas',
-    'TI',
-    'Administrador',
-    'Logística',
-    'Marketing'
-  ];
+  const [rolUsuario, setRolUsuario] = useState('');
 
   useEffect(() => {
+    setRolUsuario(localStorage.getItem('rolUsuario') || ''); // Obtiene el rol del usuario
     fetchTickets();
   }, []);
 
@@ -55,19 +43,15 @@ function Tickets() {
 
   const handleSaveTicket = async () => {
     try {
-      // Verificar cuántos tickets ya existen para la persona
       const existingTickets = tickets.filter(ticket => ticket.nombre === newTicketData.nombre);
       if (existingTickets.length >= 2) {
         alert('No se pueden emitir más de 2 tickets por persona diarios.');
         return;
       }
 
-      // Obtener la fecha y hora actuales en formato YYYY-MM-DD HH:MM:SS
       const currentDateTime = new Date().toISOString().replace('T', ' ').split('.')[0];
-  
-      // Agregar la fecha y hora actuales a newTicketData
       const ticketWithDateTime = { ...newTicketData, fecha: currentDateTime };
-  
+
       const response = await fetch('http://localhost:5101/api/tickets', {
         method: 'POST',
         headers: {
@@ -75,21 +59,18 @@ function Tickets() {
         },
         body: JSON.stringify(ticketWithDateTime),
       });
-  
+
       if (!response.ok) throw new Error('Error al guardar el ticket');
       const data = await response.json();
-      setTickets([...tickets, data]); // Agrega el nuevo ticket al estado
-      setShowForm(false); // Cierra el formulario
+      setTickets([...tickets, data]);
+      setShowForm(false);
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Función para imprimir el ticket
   const handlePrintTicket = (ticket) => {
     const printWindow = window.open('', '', 'width=600,height=400');
-  
-    // Generar el contenido del ticket sin el código de barras
     printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="en">
@@ -110,11 +91,9 @@ function Tickets() {
       </body>
       </html>
     `);
-  
     printWindow.document.close();
   };
 
-  // Función para eliminar un ticket
   const handleDeleteTicket = async (ticketId) => {
     try {
       const response = await fetch(`http://localhost:5101/api/tickets/${ticketId}`, {
@@ -131,14 +110,16 @@ function Tickets() {
     <div className="p-4 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Gestión de Tickets</h1>
       <div className="bg-white shadow-md rounded p-6">
-        <div className="flex justify-between mb-4">
-          <button onClick={handleAddTicket} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
-            Crear Ticket
-          </button>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-400">
-            Exportar
-          </button>
-        </div>
+        {rolUsuario !== 'cliente' && (
+          <div className="flex justify-between mb-4">
+            <button onClick={handleAddTicket} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
+              Crear Ticket
+            </button>
+            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-400">
+              Exportar
+            </button>
+          </div>
+        )}
 
         {showForm && (
           <div className="mb-4">
@@ -208,12 +189,14 @@ function Tickets() {
                   >
                     Imprimir
                   </button>
-                  <button
-                    onClick={() => handleDeleteTicket(ticket._id)}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
-                  >
-                    Eliminar
-                  </button>
+                  {rolUsuario !== 'cliente' && (
+                    <button
+                      onClick={() => handleDeleteTicket(ticket._id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
