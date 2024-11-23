@@ -55,13 +55,27 @@ function Tickets() {
 
   const handleSaveTicket = async () => {
     try {
+      // Verificar cuántos tickets ya existen para la persona
+      const existingTickets = tickets.filter(ticket => ticket.nombre === newTicketData.nombre);
+      if (existingTickets.length >= 2) {
+        alert('No se pueden emitir más de 2 tickets por persona diarios.');
+        return;
+      }
+
+      // Obtener la fecha y hora actuales en formato YYYY-MM-DD HH:MM:SS
+      const currentDateTime = new Date().toISOString().replace('T', ' ').split('.')[0];
+  
+      // Agregar la fecha y hora actuales a newTicketData
+      const ticketWithDateTime = { ...newTicketData, fecha: currentDateTime };
+  
       const response = await fetch('http://localhost:5101/api/tickets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newTicketData),
+        body: JSON.stringify(ticketWithDateTime),
       });
+  
       if (!response.ok) throw new Error('Error al guardar el ticket');
       const data = await response.json();
       setTickets([...tickets, data]); // Agrega el nuevo ticket al estado
@@ -74,13 +88,29 @@ function Tickets() {
   // Función para imprimir el ticket
   const handlePrintTicket = (ticket) => {
     const printWindow = window.open('', '', 'width=600,height=400');
+  
+    // Generar el contenido del ticket sin el código de barras
     printWindow.document.write(`
-      <h1>Ticket: ${ticket.nombre}</h1>
-      <p><strong>Contenido:</strong> ${ticket.contenido}</p>
-      <p><strong>Detalles:</strong> ${ticket.detalles}</p>
-      <p><strong>Precio:</strong> ${ticket.precio}</p>
-      <button onclick="window.print()">Imprimir</button>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Imprimir Ticket</title>
+      </head>
+      <body>
+        <h1>Ticket-ID: ${ticket._id}</h1>
+        <h1>Nombre: ${ticket.nombre}</h1>
+        <p><strong>Contenido:</strong> ${ticket.contenido}</p>
+        <p><strong>Detalles:</strong> ${ticket.detalles}</p>
+        <p><strong>Precio:</strong> ${ticket.precio}</p>
+        <p><strong>Fecha:</strong> ${ticket.fecha}</p>
+        <br>
+        <button onclick="window.print()">Imprimir</button>
+      </body>
+      </html>
     `);
+  
     printWindow.document.close();
   };
 
@@ -91,7 +121,7 @@ function Tickets() {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Error al eliminar el ticket');
-      setTickets(tickets.filter(ticket => ticket._id !== ticketId)); // Elimina el ticket del estado
+      setTickets(tickets.filter(ticket => ticket._id !== ticketId)); 
     } catch (error) {
       console.error(error);
     }
@@ -172,20 +202,19 @@ function Tickets() {
                 <td className="border px-4 py-2">{ticket.detalles}</td>
                 <td className="border px-4 py-2">{ticket.precio}</td>
                 <td className="border px-4 py-2 flex justify-center items-center">
-  <button 
-    onClick={() => handlePrintTicket(ticket)}
-    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-400 mr-2"
-  >
-    Imprimir
-  </button>
-  <button
-    onClick={() => handleDeleteTicket(ticket._id)}
-    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
-  >
-    Eliminar
-  </button>
-</td>
-
+                  <button 
+                    onClick={() => handlePrintTicket(ticket)}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-400 mr-2"
+                  >
+                    Imprimir
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTicket(ticket._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
+                  >
+                    Eliminar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
