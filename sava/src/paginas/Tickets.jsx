@@ -7,13 +7,24 @@ function Tickets() {
     nombre: '',
     contenido: 'Turno 1',
     detalles: 'Finanzas',
-    precio: '4990'
+    precio: '4990',
   });
 
-  const [rolUsuario, setRolUsuario] = useState('');
+  const contenidoOptions = [
+    { value: 'Turno 1', label: 'Desayuno + Almuerzo', precio: '4990' },
+    { value: 'Turno 2', label: 'Once + Cena1', precio: '7990' },
+    { value: 'Turno 3', label: 'Cena2 + Desayuno', precio: '5990' },
+  ];
+
+  const detallesOptions = [
+    'Finanzas',
+    'TI',
+    'Administrador',
+    'Logística',
+    'Marketing',
+  ];
 
   useEffect(() => {
-    setRolUsuario(localStorage.getItem('rolUsuario') || ''); // Obtiene el rol del usuario
     fetchTickets();
   }, []);
 
@@ -37,7 +48,7 @@ function Tickets() {
     setNewTicketData({
       ...newTicketData,
       contenido: selectedTurno.value,
-      precio: selectedTurno.precio
+      precio: selectedTurno.precio,
     });
   };
 
@@ -54,9 +65,7 @@ function Tickets() {
 
       const response = await fetch('http://localhost:5101/api/tickets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ticketWithDateTime),
       });
 
@@ -96,11 +105,9 @@ function Tickets() {
 
   const handleDeleteTicket = async (ticketId) => {
     try {
-      const response = await fetch(`http://localhost:5101/api/tickets/${ticketId}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(`http://localhost:5101/api/tickets/${ticketId}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Error al eliminar el ticket');
-      setTickets(tickets.filter(ticket => ticket._id !== ticketId)); 
+      setTickets(tickets.filter(ticket => ticket._id !== ticketId));
     } catch (error) {
       console.error(error);
     }
@@ -110,16 +117,11 @@ function Tickets() {
     <div className="p-4 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Gestión de Tickets</h1>
       <div className="bg-white shadow-md rounded p-6">
-        {rolUsuario !== 'cliente' && (
-          <div className="flex justify-between mb-4">
-            <button onClick={handleAddTicket} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
-              Crear Ticket
-            </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-400">
-              Exportar
-            </button>
-          </div>
-        )}
+        <div className="flex justify-between mb-4">
+          <button onClick={handleAddTicket} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
+            Crear Ticket
+          </button>
+        </div>
 
         {showForm && (
           <div className="mb-4">
@@ -167,7 +169,7 @@ function Tickets() {
 
         <table className="w-full table-auto border-collapse">
           <thead>
-            <tr className="bg-blue-500 font-extrabold text-white text-xl">
+            <tr className="bg-blue-500 text-white">
               <th className="border px-4 py-2">Nombre</th>
               <th className="border px-4 py-2">Turno</th>
               <th className="border px-4 py-2">Departamento</th>
@@ -189,14 +191,12 @@ function Tickets() {
                   >
                     Imprimir
                   </button>
-                  {rolUsuario !== 'cliente' && (
-                    <button
-                      onClick={() => handleDeleteTicket(ticket._id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleDeleteTicket(ticket._id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400"
+                  >
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}

@@ -9,6 +9,9 @@ const usuarioSchema = new mongoose.Schema({
     enum: ['admin', 'cliente', 'cajero'], 
     default: 'admin', 
   },
+  area: { type: String, default: '' },
+  perfil: { type: String, default: '' },
+  tickets: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
