@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 mongoose.set('strictQuery', true);
+const ticketRoutes = require('./routes/tickets');
 
 const app = express();
 const PORT = process.env.PORT || 5101;
@@ -21,8 +22,11 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/reportes', require('./routes/reportes'));
-app.use('/api/tickets', require('./routes/tickets'));
 app.use('/api/usuarios', require('./routes/usuarios'));
+app.use('/api/crearusuario', require('./routes/crearusuario'));
+
+app.use('/api/tickets', ticketRoutes);
+
 
 
 // Iniciar el servidor

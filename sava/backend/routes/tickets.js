@@ -1,17 +1,69 @@
 const express = require('express');
 const router = express.Router();
+const Ticket = require('../models/Ticket');
 
-// Datos de ejemplo, en producción deberías obtenerlos de una base de datos
-const tickets = [
-  { nombre: 'TIPO 1', contenido: 'Almuerzo + Bebida', detalles: 'Para Funcionario', precio: 0 },
-  { nombre: 'TIPO 2', contenido: 'Cena + Bebida', detalles: 'Para Visitante', precio: 500 },
-];
-
-router.get('/tickets', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    res.status(200).json(tickets);
+    const tickets = await Ticket.find();
+    res.json(tickets);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los tickets', error: error.message });
+    res.status(500).json({ error: 'Error al obtener los tickets' });
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const newTicket = new Ticket(req.body);
+    await newTicket.save();
+    res.status(201).json(newTicket);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el ticket' });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const ticket = await Ticket.findByIdAndDelete(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket no encontrado' });
+    }
+    res.status(200).json({ message: 'Ticket eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el ticket' });
+  }
+});
+
+router.post('/validar-ticket', async (req, res) => {
+  const { ticketId } = req.body;
+  try {
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: 'El ticket no existe' });
+    }
+    if (ticket.usado) {
+      return res.status(400).json({ message: 'El ticket ya fue usado' });
+    }
+    res.status(200).json({ message: 'El ticket es válido', ticket });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al validar el ticket', error: error.message });
+  }
+});
+
+router.post('/consumir-ticket', async (req, res) => {
+  const { ticketId } = req.body;
+  try {
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: 'El ticket no existe' });
+    }
+    if (ticket.usado) {
+      return res.status(400).json({ message: 'El ticket ya fue usado' });
+    }
+    ticket.usado = true;
+    await ticket.save();
+    res.status(200).json({ message: 'El ticket ha sido marcado como usado', ticket });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al consumir el ticket', error: error.message });
   }
 });
 

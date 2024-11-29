@@ -6,17 +6,16 @@ import Dashboard from './paginas/Dashboard';
 import Reporte from './paginas/Reporte';
 import Usuarios from './paginas/Usuarios';
 import Tickets from './paginas/Tickets';
-import ProtectedRoute from './componentes/ProtectedRoute'; // Importa el componente
+import ProtectedRoute from './componentes/ProtectedRoute';
+import CrearUsuario from './paginas/CrearUsuario';
+import Caja from './paginas/Caja';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rutas para login y registro */}
         <Route path="/login" element={<PagLogin />} />
         <Route path="/registro" element={<PagRegistro />} />
-
-        {/* Rutas protegidas con layout */}
         <Route path="/" element={<Layout />}>
           <Route
             index
@@ -59,6 +58,14 @@ function App() {
             }
           />
           <Route
+            path="/crear-usuario"
+            element={
+              <ProtectedRoute>
+                <CrearUsuario />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="tickets"
             element={
               <ProtectedRoute>
@@ -71,6 +78,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <h1>Ajustes del Sistema</h1>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="caja"
+            element={
+              <ProtectedRoute>
+                <Caja />
               </ProtectedRoute>
             }
           />

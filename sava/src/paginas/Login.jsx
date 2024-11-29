@@ -5,6 +5,7 @@ import { loginUser } from '../services/api';
 function PagLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -15,6 +16,7 @@ function PagLogin() {
       if (data.success) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('nombreUsuario', data.nombre);
+        localStorage.setItem('rolUsuario', data.rol);
         navigate('/dashboard');
       } else {
         alert('Credenciales incorrectas');
